@@ -33,3 +33,12 @@ add_executable(tests
     src/tests.cpp
 )
 target_include_directories(tests PRIVATE external)
+
+# Cube library
+add_library(cube STATIC src/cube.cpp)
+target_include_directories(cube PUBLIC src)
+
+target_link_libraries(viewer  PRIVATE cube ${GLFW3_LIBRARIES} dl)
+target_link_libraries(tests   PRIVATE cube)
+target_link_libraries(trainer PRIVATE cube)
+
