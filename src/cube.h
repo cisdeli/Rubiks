@@ -111,7 +111,7 @@ CUBE_HD inline int isValid(const Cube &c) {
 }
 
 struct MoveTable {
-    uint8_t cp[NUM_CORNERS]; // new.c_positions[i]    = old.c_positions[cp[i]]
+    uint8_t cp[NUM_CORNERS]; // new.c_positions[i] = old.c_positions[cp[i]]
     uint8_t co[NUM_CORNERS]; // new.c_orientations[i] = (old.c_orientations[cp[i]] + co[i]) % 3
     uint8_t ep[NUM_EDGES];
     uint8_t eo[NUM_EDGES];
