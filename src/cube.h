@@ -68,6 +68,16 @@ CUBE_HD inline void initializeCube(Cube &c) {
     }
 }
 
+CUBE_HD inline bool isSolved(const Cube &c) {
+    for (int i = 0; i < NUM_CORNERS; i++)
+        if (c.c_positions[i] != i || c.c_orientations[i] != 0)
+            return false;
+    for (int i = 0; i < NUM_EDGES; i++)
+        if (c.e_positions[i] != i || c.e_orientations[i] != 0)
+            return false;
+    return true;
+}
+
 CUBE_HD inline int permutationParity(const uint8_t *pos, int n) {
     uint8_t visited[NUM_EDGES] = {0};
     int swaps = 0;
