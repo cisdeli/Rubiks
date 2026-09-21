@@ -231,3 +231,5 @@ CUBE_HD inline Cube applyMove(const Cube &c, Move m) {
     }
     return n;
 }
+
+void toFacelets(const Cube &c, uint8_t out[54]);

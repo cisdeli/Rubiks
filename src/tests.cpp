@@ -2,6 +2,7 @@
 #include "cube.h"
 #include <cstring>
 #include <doctest.h>
+#include <string>
 
 static const char *MOVE_NAMES[MOVE_COUNT] = {
     "U", "U'", "U2", "D", "D'", "D2", "L", "L'", "L2",
@@ -123,4 +124,87 @@ TEST_CASE("any sequence of moves leaves the cube in a valid state") {
         }
     }
     CHECK(isValid(c));
+}
+
+// ===
+// Facelets
+// ===
+
+static const char *FACE_LETTERS = "URFDLB";
+
+static std::string faceletString(const Cube &c) {
+    uint8_t f[54];
+    toFacelets(c, f);
+    std::string s(54, '?');
+    for (int i = 0; i < 54; i++)
+        s[i] = FACE_LETTERS[f[i]];
+    return s;
+}
+
+static Cube afterMoves(const Move *seq, int len) {
+    Cube c;
+    initializeCube(c);
+    for (int i = 0; i < len; i++)
+        c = applyMove(c, seq[i]);
+    return c;
+}
+
+TEST_CASE("a solved cube is nine of each colour, face by face") {
+    Cube c;
+    initializeCube(c);
+    uint8_t f[54];
+    toFacelets(c, f);
+    for (int i = 0; i < 54; i++) {
+        CAPTURE(i);
+        CHECK(f[i] == i / 9);
+    }
+    CHECK(faceletString(c) ==
+          "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB");
+}
+
+TEST_CASE("centres never move and colours stay balanced") {
+    Cube c;
+    initializeCube(c);
+    uint32_t seed = 987654321u;
+    for (int it = 0; it < 20000; it++) {
+        seed = seed * 1103515245u + 12345u;
+        Move m = (Move)((seed >> 16) % MOVE_COUNT);
+        c = applyMove(c, m);
+
+        uint8_t f[54];
+        toFacelets(c, f);
+
+        int count[6] = {0};
+        for (int i = 0; i < 54; i++)
+            count[f[i]]++;
+
+        for (int face = 0; face < 6; face++) {
+            if (f[face * 9 + 4] != face || count[face] != 9) {
+                CAPTURE(it);
+                CAPTURE(face);
+                CAPTURE(count[face]);
+                REQUIRE(false);
+            }
+        }
+    }
+}
+
+TEST_CASE("a move actually changes the facelets") {
+    Cube c;
+    initializeCube(c);
+    std::string solved = faceletString(c);
+    for (int m = 0; m < MOVE_COUNT; m++) {
+        CAPTURE(m);
+        CHECK(faceletString(applyMove(c, (Move)m)) != solved);
+    }
+}
+
+TEST_CASE("known scrambles produce known facelet strings") {
+    Move sexy[4] = {R, U, R_PRIME, U_PRIME};
+    CHECK(faceletString(afterMoves(sexy, 4)) ==
+          "UULUUFUUFRRUBRRURRFFDFFUFFFDDRDDDDDDBLLLLLLLLBRRBBBBBB");
+
+    Move scramble[8] = {R, U2, F_PRIME, D, L2, B, U_PRIME, R2};
+    CHECK(faceletString(afterMoves(scramble, 8)) ==
+          "FURRULLDULFUBRDDDRUBBBFRDLBFDRFDRBUBDUFULLDRRFLLFBFUBL");
 }
